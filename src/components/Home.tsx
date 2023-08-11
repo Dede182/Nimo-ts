@@ -1,4 +1,4 @@
-import React, {  useCallback, useEffect, useMemo, useState } from 'react'
+import {  useCallback, useEffect, useMemo, useState } from 'react'
 import { useAppDispatch, useAppSelector } from '../redux/hooks'
 import { changeLoading, fetchMovies, getMovieState } from '../redux/movies/movieSlice';
 import MemorizedMovieCard from './Movies/MovieCard';

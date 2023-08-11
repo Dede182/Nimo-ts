@@ -1,12 +1,11 @@
-import React, { useCallback, useEffect, useState } from 'react'
+import React, {  useCallback, useEffect, useState } from 'react'
 import { useParams } from 'react-router-dom';
 import { AxiosResponse } from 'axios';
 import { fetchCredit, fetchMovieDetail, fetchRelatedMovies } from '../../api/MovieDetail';
-// import { Navigation } from "swiper";
 import { CircularProgressbar, buildStyles } from "react-circular-progressbar";
 import { BsCircleFill } from "react-icons/bs";
 import { FiArrowLeft, FiArrowRight } from "react-icons/fi";
-import { Swiper, SwiperSlide } from "swiper/react";
+import { Swiper ,SwiperSlide } from "swiper/react";
 import "swiper/css/navigation";
 import "react-circular-progressbar/dist/styles.css";
 // Import Swiper styles
@@ -16,19 +15,77 @@ import AppLoading from '../AppLoader';
 import { Navigation } from 'swiper/modules';
 import MemorizedMovieCard from './MovieCard';
 import MemorizedMovieCast from './MovieCast';
-interface T {}
+import {  MovieCastType, MovieDetailType, RelatedMovieType } from '../../redux/movies/movietypes';
 
-interface R {}
+type MovieInfoFC = Promise<Error | AxiosResponse<unknown, unknown> | undefined>;
+// eslint-disable-next-line @typescript-eslint/ban-ts-comment
+// @ts-ignore
+type MovieInfoSC = React.Dispatch<React.SetStateAction<S>>
 
-type MovieInfoFC = Promise<Error | AxiosResponse<unknown, any> | undefined>;
-type MovieInfoSC = React.Dispatch<React.SetStateAction<R[] | T[]>>
+
+const initialRelatedMovie : RelatedMovieType = {
+  results : []
+}
+
+const initialCast : MovieCastType = {
+  cast : [
+    {
+      name : "",
+      profile_path : "",
+      character : "",
+      original_name : "",
+    
+    }
+  ]
+}
+
+const intialMovieDetailType : MovieDetailType = {
+  runtime : 0,
+    vote_average : 0,
+    genres : [
+      {
+        id : 0,
+        name : ""
+      }
+    ],
+    poster_path : "",
+    title : "",
+    overview : "",
+    release_date : "",
+    tagline : "",
+    backdrop_path : "",
+    id : 0,
+    vote_count : 0,
+    status : "",
+    budget : 0,
+    revenue : 0,
+    original_language : "",
+    original_title : "",
+    popularity : 0,
+    video : false,
+    adult : false,
+    homepage : "",
+    imdb_id : "",
+    production_companies : [
+      {
+        id : 0,
+        logo_path : "",
+        name : "",
+      }
+    ],
+    production_countries : [],
+    spoken_languages : [],
+    belongs_to_collection : "",
+    videos : [],
+}
 
 function movieInfo({fc,sc}: {fc: MovieInfoFC,sc:MovieInfoSC}) {
     const data = fc;
     data.then((res)=>{
-      if(res && res.status  == 200){
-        sc(res.data)
-      }
+        if(!(res instanceof Error) && res && res.status !  == 200){
+          sc(res.data as MovieDetailType | MovieCastType | RelatedMovieType )
+        }
+      
     })
     .catch(e  => {
       if(e instanceof Error){
@@ -38,14 +95,16 @@ function movieInfo({fc,sc}: {fc: MovieInfoFC,sc:MovieInfoSC}) {
 }
 
 const MovieDetail = () => {
-  const [details,setDetails] = useState<T[]>([]);
-  const [casts, setCasts] = useState<T[]>([]);
-  const [relatedMovies, setRelatedMovies] =  useState<T[]>([]);
+  const [details,setDetails] = useState<MovieDetailType>(intialMovieDetailType) ; 
+  const [casts, setCasts] = useState<MovieCastType>(initialCast);
+  const [relatedMovies, setRelatedMovies] =  useState<RelatedMovieType>(initialRelatedMovie);
   const [loading, setLoading] = useState<boolean>(false);
-  const [my_swiper, set_my_swiper] = useState({});
+// eslint-disable-next-line @typescript-eslint/ban-ts-comment
+// @ts-ignore
+  const [my_swiper, set_my_swiper] = useState<T>();
 
-  const hour :number = Math.floor(details?.runtime / 60);
-  const minute :number = details.runtime % 60;
+  const hour :number = Math.floor(details.runtime  / 60);
+  const minute :number = details.runtime % 60 ;  
 
   const { id } = useParams();
   const getMovieDetail = useCallback(() => {
@@ -63,11 +122,16 @@ const MovieDetail = () => {
   },[getMovieDetail, id])
 
 
-  const percent = details?.vote_average?.toFixed(1) * 10;
+  let percent   = 0;
+
+    const voteAverage = Number(details.vote_average);
+  if (!isNaN(voteAverage)) {
+     percent = Number((voteAverage * 10).toFixed(1));
+  } 
 
   return (
     <MemorizedNavigations>
-      {(loading && details.length == 0) ? (
+      {(loading && details == intialMovieDetailType) ? (
         <AppLoading />
       ) : (
         <div className="max-w-[1400px] mx-auto pt-[60px]">
@@ -114,7 +178,7 @@ const MovieDetail = () => {
                   <BsCircleFill className="text-[4px] text-[#fff] mx-2" />
                   {details?.genres?.map((gener, index) => (
                     <div className="pl-1 text-[#fff]" key={index}>
-                      {gener.name}
+                      {gener.name }
                     </div>
                   ))}
                   <BsCircleFill className="text-[4px] text-[#fff] mx-2" />
@@ -134,7 +198,6 @@ const MovieDetail = () => {
                       backgroundPadding={6}
                       styles={buildStyles({
                         backgroundColor: "#081C22",
-                        fontWeight: "500",
                         textColor: "white",
                         pathColor: percent >= 70 ? "#21D07A" : "#D2D531",
                         trailColor: percent >= 70 ? "#204529" : "rgb(66,61,15)",
@@ -225,7 +288,6 @@ const MovieDetail = () => {
                   backgroundPadding={6}
                   styles={buildStyles({
                     backgroundColor: "#081C22",
-                    fontWeight: "500",
                     textColor: "white",
                     pathColor: percent >= 70 ? "#21D07A" : "#D2D531",
                     trailColor: percent >= 70 ? "#204529" : "rgb(66,61,15)",
@@ -301,14 +363,14 @@ const MovieDetail = () => {
                   set_my_swiper(ev);
                 }}
               >
-                {casts?.cast?.map((cast, index) => (
+                { (Array.isArray(casts.cast)) && casts?.cast?.map((cast, index) => (
                   <SwiperSlide key={index}>
                     <MemorizedMovieCast cast={cast} />
                   </SwiperSlide>
                 ))}
               </Swiper>
               <button
-                onClick={() => my_swiper.slideNext()}
+                onClick={() => my_swiper.slideNext() }
                 className="w-[38px] h-[70px] bg-red-600 flex justify-center items-center z-10 px-3"
               >
                 <FiArrowRight className="text-2xl !text-white font-[600]" />

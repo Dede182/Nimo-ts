@@ -1,3 +1,4 @@
+import { MovieActionPayloads } from './movieSlice';
 import { RootState } from './../store';
 import { moviesStateType } from './movietypes';
 import { ApiRequest } from './../../api/ApiRequest';
@@ -57,10 +58,13 @@ export const searchMovieSlice = createSlice({
         }
         ).addCase(searchMovies.fulfilled, (state, action ) => {
             state.loading = 'idle'
-            state.movies = action?.payload?.results
-            state.page = action?.payload?.page
-            state.total_pages = action?.payload?.total_pages
-            state.total_results = action?.payload?.total_results
+
+            const { page, results, total_pages, total_results } = action.payload as MovieActionPayloads;
+
+            state.movies = results
+            state.page = page
+            state.total_pages = total_pages
+            state.total_results = total_results
         })
     }
 })

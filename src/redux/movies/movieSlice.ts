@@ -1,6 +1,6 @@
 import { createAsyncThunk } from './../../../node_modules/@reduxjs/toolkit/src/createAsyncThunk';
 import { ApiRequest } from './../../api/ApiRequest';
-import { createSlice } from "@reduxjs/toolkit";
+import { PayloadAction, createSlice } from "@reduxjs/toolkit";
 import { moviesStateType, fetchParams } from './movietypes';
 import { RootState } from '../store';
 
@@ -44,6 +44,20 @@ export const fetchMovies = createAsyncThunk('movies/fetchMovies', async (page : 
     }
 })
 
+export type MovieActionPayloads = 
+{
+    page: number;
+    results: [];
+    total_pages: number;
+    total_results: number;
+};
+
+type payLoadType = PayloadAction< unknown, string, {
+    arg: number;
+    requestId: string;
+    requestStatus: "fulfilled";
+}, never>
+
 export const movieSlice = createSlice({
     name: 'movies',
     initialState: initialMovies,
@@ -54,18 +68,21 @@ export const movieSlice = createSlice({
     },
     extraReducers: (builder) => {
         builder
-            .addCase(fetchMovies.pending, (state) => {
+            .addCase(fetchMovies.pending, (state : moviesStateType) => {
                 state.loading = 'fetching'
                 
             })
-            .addCase(fetchMovies.fulfilled, (state, action ) => {
+            .addCase(fetchMovies.fulfilled, (state : moviesStateType, action :payLoadType )  => {
                 state.loading = 'succeeded'
 
-                const newMovies = action?.payload?.results
+               const { page, results, total_pages, total_results } = action.payload as MovieActionPayloads;
+
+                const newMovies  = results;
+
                 state.movies = state.movies.concat(newMovies)
-                state.page = action?.payload?.page
-                state.total_pages = action?.payload?.total_pages
-                state.total_results = action?.payload?.total_results
+                state.page = page
+                state.total_pages = total_pages
+                state.total_results = total_results
             })
             .addCase(fetchMovies.rejected, (state, action) => {
                 state.loading = 'failed'

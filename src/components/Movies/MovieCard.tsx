@@ -6,7 +6,7 @@ import "react-circular-progressbar/dist/styles.css";
 import { movieType } from "../../redux/movies/movietypes";
 
 type MovieProps = {
-    movie: movieType | any;
+    movie: movieType ;
 };
 
 const MovieCard = ({ movie } : MovieProps) => {
