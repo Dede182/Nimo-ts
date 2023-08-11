@@ -13,13 +13,13 @@
     "isolatedModules": true,
     "noEmit": true,
     "jsx": "react-jsx",
-
     /* Linting */
     "strict": true,
-    "noUnusedLocals": true,
-    "noUnusedParameters": true,
+    "noUnusedLocals": false,
+    "noUnusedParameters": false,
     "noFallthroughCasesInSwitch": true,
   },
+  "exclude": ["node_modules/@reduxjs/toolkit"],
   "include": ["src"],
   "references": [{ "path": "./tsconfig.node.json" }]
 }
