@@ -50,6 +50,6 @@ export const ApiRequest = async <T>(value : ApiRequestBodyType) : Promise<AxiosR
             result = response;
         })
         .catch((err) => (result = err));
-    console.log(result);
+    // console.log(result);
     return result;
 }

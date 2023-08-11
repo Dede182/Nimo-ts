@@ -1,7 +1,6 @@
 import React, {  useCallback, useEffect, useState } from 'react'
 import { useParams } from 'react-router-dom';
-import { AxiosResponse } from 'axios';
-import { fetchCredit, fetchMovieDetail, fetchRelatedMovies } from '../../api/MovieDetail';
+import {  fetchMovieDetailApi, } from '../../api/MovieDetail';
 import { CircularProgressbar, buildStyles } from "react-circular-progressbar";
 import { BsCircleFill } from "react-icons/bs";
 import { FiArrowLeft, FiArrowRight } from "react-icons/fi";
@@ -16,17 +15,16 @@ import { Navigation } from 'swiper/modules';
 import MemorizedMovieCard from './MovieCard';
 import MemorizedMovieCast from './MovieCast';
 import {  MovieCastType, MovieDetailType, RelatedMovieType } from '../../redux/movies/movietypes';
+import { AxiosResponse } from 'axios';
 
-type MovieInfoFC = Promise<Error | AxiosResponse<unknown, unknown> | undefined>;
+// type MovieInfoFC = Promise<Error | AxiosResponse<unknown, unknown> | undefined>;
 // eslint-disable-next-line @typescript-eslint/ban-ts-comment
 // @ts-ignore
-type MovieInfoSC = React.Dispatch<React.SetStateAction<S>>
-
+// type MovieInfoSC = React.Dispatch<React.SetStateAction<S>>
 
 const initialRelatedMovie : RelatedMovieType = {
   results : []
 }
-
 const initialCast : MovieCastType = {
   cast : [
     {
@@ -38,7 +36,6 @@ const initialCast : MovieCastType = {
     }
   ]
 }
-
 const intialMovieDetailType : MovieDetailType = {
   runtime : 0,
     vote_average : 0,
@@ -79,20 +76,20 @@ const intialMovieDetailType : MovieDetailType = {
     videos : [],
 }
 
-function movieInfo({fc,sc}: {fc: MovieInfoFC,sc:MovieInfoSC}) {
-    const data = fc;
-    data.then((res)=>{
-        if(!(res instanceof Error) && res && res.status !  == 200){
-          sc(res.data as MovieDetailType | MovieCastType | RelatedMovieType )
-        }
+// function movieInfo({fc,sc}: {fc: MovieInfoFC,sc:MovieInfoSC}) {
+//     const data = fc;
+//     data.then((res)=>{
+//         if(!(res instanceof Error) && res && res.status !  == 200){
+//           sc(res.data as MovieDetailType | MovieCastType | RelatedMovieType )
+//         }
       
-    })
-    .catch(e  => {
-      if(e instanceof Error){
-        console.log(e)
-      }
-    })  
-}
+//     })
+//     .catch(e  => {
+//       if(e instanceof Error){
+//         console.log(e)
+//       }
+//     })  
+// }
 
 const MovieDetail = () => {
   const [details,setDetails] = useState<MovieDetailType>(intialMovieDetailType) ; 
@@ -108,10 +105,32 @@ const MovieDetail = () => {
 
   const { id } = useParams();
   const getMovieDetail = useCallback(() => {
-    movieInfo({ fc: fetchMovieDetail(id), sc: setDetails });
-    movieInfo({ fc: fetchCredit(id), sc: setCasts });
-    movieInfo({ fc: fetchRelatedMovies(id), sc: setRelatedMovies });
-  }, [id, setDetails, setCasts]);
+    // movieInfo({ fc: fetchMovieDetail(id), sc: setDetails });
+    // movieInfo({ fc: fetchCredit(id), sc: setCasts });
+    // movieInfo({ fc: fetchRelatedMovies(id), sc: setRelatedMovies });
+    
+    fetchMovieDetailApi(id).then((res) => {
+      if( ! (res.movieDetail instanceof Error ) && !(res.credit instanceof Error) && !(res.relatedMovies instanceof Error)){
+        //note here shine : we conditions check if the promise is fulfilled or not ,if one service fail the other will not be affected
+        if(res.movieDetail.status == 'fulfilled')
+        {
+          const result = res.movieDetail as PromiseFulfilledResult<AxiosResponse>;
+          setDetails(result.value.data as MovieDetailType)
+        }
+        if(res.credit.status == 'fulfilled')
+        {
+          const result = res.credit as PromiseFulfilledResult<AxiosResponse>;
+          setCasts(result.value.data as MovieCastType)
+
+        }
+        if(res.relatedMovies.status == 'fulfilled' )
+        {
+          const result = res.relatedMovies as PromiseFulfilledResult<AxiosResponse>;
+          setRelatedMovies(result.value.data as RelatedMovieType)
+        }
+      }
+    });
+  }, [id]);
 
   useEffect(()=>{
     setLoading(true);
@@ -120,11 +139,8 @@ const MovieDetail = () => {
     getMovieDetail()
 
   },[getMovieDetail, id])
-
-
   let percent   = 0;
-
-    const voteAverage = Number(details.vote_average);
+  const voteAverage = Number(details.vote_average);
   if (!isNaN(voteAverage)) {
      percent = Number((voteAverage * 10).toFixed(1));
   } 
