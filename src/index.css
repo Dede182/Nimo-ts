@@ -1,0 +1,36 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+.bg-detail {
+  background-image: linear-gradient(
+    to right,
+    rgba(52.5, 52.5, 52.5, 1) calc((50vw - 170px) - 340px),
+    rgba(52.5, 52.5, 52.5, 0.84) 50%,
+    rgba(52.5, 52.5, 52.5, 0.84) 100%
+  ) !important;
+}
+
+.CircularProgressbar {
+  font-weight: bold;
+}
+
+.movie-title {
+  -webkit-line-clamp: 1;
+    -webkit-box-orient: vertical;
+    display: block;
+    display: -webkit-box;
+    /* line-height: 1.4; */
+    max-width: 100%;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.mobile-bg {
+  background-size: cover;
+  background-position: 50% 25%;
+}
+
+body {
+  background-color: #121212;
+}
